@@ -238,11 +238,17 @@
       margin-bottom: 14px;
       transition: box-shadow .3s;
       background: rgba(0,0,0,0.3);
+      max-height: 240px;
     }
     #reader.ok   { box-shadow: 0 0 0 3px #43e97b, 0 0 20px rgba(67,233,123,0.3); }
     #reader.erro { box-shadow: 0 0 0 3px #f5576c, 0 0 20px rgba(245,87,108,0.3); }
 
-    #reader video { border-radius: 14px; }
+    #reader video {
+      border-radius: 14px;
+      width: 100% !important;
+      height: 220px !important;
+      object-fit: cover;
+    }
     #reader__dashboard_section_csr button,
     #reader__dashboard_section_swaplink { color: #a78bfa !important; }
     #reader__status_span { color: #6B7280 !important; font-size: .8rem !important; }
@@ -407,6 +413,16 @@
     }
     .badge-green { background: rgba(67,233,123,0.2); color: #43e97b; }
     .badge-red   { background: rgba(245,87,108,0.2); color: #f5576c; }
+
+    @media (max-width: 480px) {
+      #reader {
+        max-height: 190px;
+      }
+
+      #reader video {
+        height: 170px !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -700,9 +716,12 @@ function iniciarScanner() {
         '<p style="color:#f6d365;text-align:center;padding:24px;font-family:Poppins,sans-serif;">⚠️ Biblioteca do scanner não carregou.<br>Use a entrada manual acima.</p>';
       return;
     }
+    const isMobile = window.matchMedia("(max-width: 480px)").matches;
     const scanner = new Html5QrcodeScanner("reader", {
       fps: 10,
-      qrbox: { width: 240, height: 140 },
+      qrbox: isMobile
+        ? { width: 180, height: 95 }
+        : { width: 240, height: 140 },
       rememberLastUsedCamera: true,
       supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
     });
