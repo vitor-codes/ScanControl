@@ -650,8 +650,8 @@ function formatarDataHoraBR(dataIso) {
     /(\d{4})-(\d{2})-(\d{2})[T\s](\d{2}):(\d{2})/
   );
   if (!match) return "—";
-  const [, , mes, dia, hora, minuto] = match;
-  return `${dia}/${mes}, ${hora}:${minuto}`;
+  const [, , mes, dia] = match;
+  return `${dia}/${mes}`;
 }
 
 // ──────────────────────────────────────────────

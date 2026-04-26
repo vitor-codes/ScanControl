@@ -1,0 +1,6 @@
+irá ler a imagem
+descrever  a imagem (com foco em caixas de papelão)
+perguntar o que quer fazer com as imagens
+ 	exemplo: se for uma caixa com 30 unidades dentro, e for detectado 5 caixas. então irá calcular 30 * 5
+	essa informaçao irá para o relatorio de conferencia
+quero ter um time
