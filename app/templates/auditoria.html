@@ -694,8 +694,8 @@ async function carregarSessoes() {
       const opt = document.createElement("option");
       opt.value = s.id;
       const data = s.criada_em
-        ? new Date(s.criada_em).toLocaleString("pt-BR",
-            { day:"2-digit", month:"2-digit", hour:"2-digit", minute:"2-digit" })
+        ? new Date(s.criada_em).toLocaleDateString("pt-BR",
+            { day:"2-digit", month:"2-digit" })
         : "—";
       opt.text = s.nome ? `#${s.id} — ${s.nome}  (${data})` : `#${s.id}  (${data})`;
       sel.appendChild(opt);
@@ -887,9 +887,8 @@ async function carregarHistorico() {
       const ac    = a.acuracidade_geral ?? 0;
       const acCls = ac >= 95 ? "ac-alta" : ac >= 85 ? "ac-media" : "ac-baixa";
       const data  = a.criada_em
-        ? new Date(a.criada_em).toLocaleString("pt-BR",
-            { day:"2-digit", month:"2-digit", year:"2-digit",
-              hour:"2-digit", minute:"2-digit" })
+        ? new Date(a.criada_em).toLocaleDateString("pt-BR",
+            { day:"2-digit", month:"2-digit", year:"2-digit" })
         : "—";
       const nome  = a.nome || `Auditoria #${a.id}`;
       return `
