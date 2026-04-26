@@ -424,6 +424,28 @@
       #reader video {
         height: 150px !important;
       }
+
+      #catalogoCard {
+        position: fixed;
+        right: 10px;
+        bottom: 12px;
+        width: calc(100vw - 24px);
+        z-index: 40;
+        transform: translateX(calc(100% + 20px));
+        opacity: 0;
+        margin-bottom: 0;
+        transition: transform .25s ease, opacity .25s ease;
+      }
+
+      #catalogoCard.aberto {
+        transform: translateX(0);
+        opacity: 1;
+      }
+
+      #catalogoArea {
+        max-height: 40vh;
+        overflow: auto;
+      }
     }
   </style>
 </head>
@@ -534,7 +556,7 @@
 </div>
 
 <!-- ── CATÁLOGO DE PRODUTOS ─────────────────────────────── -->
-<div class="card card-border-purple">
+<div class="card card-border-purple" id="catalogoCard">
   <div class="card-header" onclick="toggleCatalogo()">
     <h3 style="margin-bottom:0;">📦 Catálogo de Produtos</h3>
     <span class="chevron" id="catalogoChevron">▼</span>
@@ -564,6 +586,8 @@ let codigoAtual   = null;
 let sessaoAtual   = null;
 let listaCompleta = [];
 let scannerUiObserver = null;
+let touchStartX = 0;
+let touchStartY = 0;
 
 // ──────────────────────────────────────────────
 // Feedback
@@ -984,6 +1008,32 @@ function toggleCatalogo() {
   if (abrir) buscarCatalogo();
 }
 
+function configurarSwipeCatalogo() {
+  const catalogoCard = document.getElementById("catalogoCard");
+  if (!catalogoCard) return;
+
+  document.addEventListener("touchstart", ev => {
+    if (!ev.touches || !ev.touches.length) return;
+    touchStartX = ev.touches[0].clientX;
+    touchStartY = ev.touches[0].clientY;
+  }, { passive: true });
+
+  document.addEventListener("touchend", ev => {
+    if (!ev.changedTouches || !ev.changedTouches.length) return;
+    const endX = ev.changedTouches[0].clientX;
+    const endY = ev.changedTouches[0].clientY;
+    const deltaX = endX - touchStartX;
+    const deltaY = endY - touchStartY;
+
+    // Ignora rolagem vertical para não atrapalhar uso durante scan/lista.
+    if (Math.abs(deltaY) > Math.abs(deltaX)) return;
+    if (window.innerWidth > 480) return;
+
+    if (deltaX <= -60) catalogoCard.classList.add("aberto");
+    if (deltaX >= 60)  catalogoCard.classList.remove("aberto");
+  }, { passive: true });
+}
+
 async function buscarCatalogo() {
   const busca = document.getElementById("buscaCatalogo").value.trim();
   const lista = document.getElementById("listaCatalogo");
@@ -1046,6 +1096,7 @@ function escapeAttr(str) {
 window.addEventListener("load", () => {
   carregarSessoes();
   iniciarScanner();
+  configurarSwipeCatalogo();
 });
 </script>
 </body>
