@@ -822,25 +822,42 @@ function ocultarControlesScanner() {
   const reader = document.getElementById("reader");
   if (!reader) return;
 
+  const video = reader.querySelector("video");
+  const streamAtivo = !!(video && video.srcObject);
+  if (!streamAtivo) return;
+
   const controles = reader.querySelectorAll(
-    "select, button, a, p, span, label, [id*='camera'], [id*='status'], [id*='dashboard'], [class*='camera'], [class*='dashboard']"
+    "#reader__dashboard_section_csr, #reader__camera_selection, #reader__dashboard_section_swaplink, #reader__status_span, #reader__dashboard"
   );
 
   controles.forEach(el => {
-    if (el.tagName === "VIDEO" || el.tagName === "CANVAS") return;
     el.style.display = "none";
   });
+}
+
+function iniciarScannerAutomaticamente() {
+  const reader = document.getElementById("reader");
+  if (!reader) return false;
+  const botoes = Array.from(reader.querySelectorAll("button"));
+  const botaoStart = botoes.find(btn =>
+    /start scanning|iniciar|iniciar leitura/i.test((btn.textContent || "").trim())
+  );
+  if (!botaoStart) return false;
+  botaoStart.click();
+  return true;
 }
 
 function iniciarLimpezaControlesScanner() {
   const reader = document.getElementById("reader");
   if (!reader) return;
 
-  ocultarControlesScanner();
+  iniciarScannerAutomaticamente();
+  setTimeout(ocultarControlesScanner, 400);
 
   if (scannerUiObserver) scannerUiObserver.disconnect();
   scannerUiObserver = new MutationObserver(() => {
     selecionarCameraTraseira();
+    iniciarScannerAutomaticamente();
     ocultarControlesScanner();
   });
   scannerUiObserver.observe(reader, { childList: true, subtree: true });
