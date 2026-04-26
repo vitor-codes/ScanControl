@@ -643,6 +643,7 @@ let listaCompleta = [];
 let scannerUiObserver = null;
 let touchStartX = 0;
 let touchStartY = 0;
+let leitorCamera = null;
 
 function formatarDataHoraBR(dataIso) {
   if (!dataIso) return "—";
@@ -864,34 +865,37 @@ function iniciarLimpezaControlesScanner() {
 }
 
 function iniciarScanner() {
-  try {
-    if (typeof Html5QrcodeScanner === "undefined") {
-      document.getElementById("reader").innerHTML =
-        '<p style="color:#f6d365;text-align:center;padding:24px;font-family:Poppins,sans-serif;">⚠️ Biblioteca do scanner não carregou.<br>Use a entrada manual acima.</p>';
-      return;
-    }
-    const isMobile = window.matchMedia("(max-width: 480px)").matches;
-    const scanner = new Html5QrcodeScanner("reader", {
-      fps: 10,
-      qrbox: isMobile
-        ? { width: 180, height: 95 }
-        : { width: 240, height: 140 },
-      rememberLastUsedCamera: true,
-      videoConstraints: { facingMode: { ideal: "environment" } },
-      supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
-    });
-    scanner.render(
-      decodedText => processarCodigo(decodedText),
-      err => {}
-    );
-    setTimeout(selecionarCameraTraseira, 400);
-    setTimeout(selecionarCameraTraseira, 1200);
-    setTimeout(iniciarLimpezaControlesScanner, 400);
-    setTimeout(iniciarLimpezaControlesScanner, 1200);
-  } catch(e) {
+  if (typeof Html5Qrcode === "undefined") {
     document.getElementById("reader").innerHTML =
-      '<p style="color:#f5576c;text-align:center;padding:24px;font-family:Poppins,sans-serif;">⚠️ Câmera não disponível.<br>Use a entrada manual.</p>';
+      '<p style="color:#f6d365;text-align:center;padding:24px;font-family:Manrope,sans-serif;">⚠️ Biblioteca do scanner não carregou.<br>Use a entrada manual acima.</p>';
+    return;
   }
+
+  const isMobile = window.matchMedia("(max-width: 480px)").matches;
+  const qrbox = isMobile
+    ? { width: 180, height: 95 }
+    : { width: 240, height: 140 };
+
+  leitorCamera = new Html5Qrcode("reader");
+  const onSucesso = decodedText => processarCodigo(decodedText);
+  const onErro = _ => {};
+
+  leitorCamera.start(
+    { facingMode: { exact: "environment" } },
+    { fps: 10, qrbox },
+    onSucesso,
+    onErro
+  ).catch(() =>
+    leitorCamera.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox },
+      onSucesso,
+      onErro
+    ).catch(() => {
+      document.getElementById("reader").innerHTML =
+        '<p style="color:#f5576c;text-align:center;padding:24px;font-family:Manrope,sans-serif;">⚠️ Câmera não disponível.<br>Use a entrada manual.</p>';
+    })
+  );
 }
 
 function erroScanner() {
