@@ -425,25 +425,40 @@
         height: 150px !important;
       }
 
+      #produtosCard,
       #catalogoCard {
         position: fixed;
-        right: 10px;
         bottom: 12px;
-        width: calc(100vw - 24px);
+        width: min(86vw, 420px);
         z-index: 40;
-        transform: translateX(calc(100% + 20px));
         opacity: 0;
         margin-bottom: 0;
         transition: transform .25s ease, opacity .25s ease;
       }
 
+      #produtosCard {
+        left: 10px;
+        transform: translateX(calc(-100% - 20px));
+      }
+
+      #catalogoCard {
+        right: 10px;
+        transform: translateX(calc(100% + 20px));
+      }
+
+      #produtosCard.aberto,
       #catalogoCard.aberto {
         transform: translateX(0);
         opacity: 1;
       }
 
+      #listaProdutos {
+        max-height: 35vh;
+        overflow: auto;
+      }
+
       #catalogoArea {
-        max-height: 40vh;
+        max-height: 35vh;
         overflow: auto;
       }
     }
@@ -543,7 +558,7 @@
 </div>
 
 <!-- ── LISTA DA SESSÃO ──────────────────────────────────── -->
-<div class="card card-border-green">
+<div class="card card-border-green" id="produtosCard">
   <h3>📋 Produtos da Sessão</h3>
 
   <div class="search-wrap">
@@ -1010,7 +1025,8 @@ function toggleCatalogo() {
 
 function configurarSwipeCatalogo() {
   const catalogoCard = document.getElementById("catalogoCard");
-  if (!catalogoCard) return;
+  const produtosCard = document.getElementById("produtosCard");
+  if (!catalogoCard || !produtosCard) return;
 
   document.addEventListener("touchstart", ev => {
     if (!ev.touches || !ev.touches.length) return;
@@ -1029,8 +1045,23 @@ function configurarSwipeCatalogo() {
     if (Math.abs(deltaY) > Math.abs(deltaX)) return;
     if (window.innerWidth > 480) return;
 
-    if (deltaX <= -60) catalogoCard.classList.add("aberto");
-    if (deltaX >= 60)  catalogoCard.classList.remove("aberto");
+    const touchInicialNaDireita = touchStartX > window.innerWidth * 0.7;
+    const touchInicialNaEsquerda = touchStartX < window.innerWidth * 0.3;
+
+    // Swipe para esquerda vindo da direita: abre catálogo.
+    if (deltaX <= -60 && touchInicialNaDireita) {
+      catalogoCard.classList.add("aberto");
+      produtosCard.classList.remove("aberto");
+    }
+    // Swipe para direita vindo da esquerda: abre produtos da sessão.
+    if (deltaX >= 60 && touchInicialNaEsquerda) {
+      produtosCard.classList.add("aberto");
+      catalogoCard.classList.remove("aberto");
+    }
+
+    // Fechamentos.
+    if (deltaX >= 60 && !touchInicialNaEsquerda) catalogoCard.classList.remove("aberto");
+    if (deltaX <= -60 && !touchInicialNaDireita) produtosCard.classList.remove("aberto");
   }, { passive: true });
 }
 
