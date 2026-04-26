@@ -248,6 +248,12 @@
       height: 220px !important;
       object-fit: cover;
     }
+    #reader__camera_selection,
+    #reader__camera_selection + span,
+    #reader__dashboard_section_swaplink,
+    #reader__status_span {
+      display: none !important;
+    }
     #reader__dashboard_section_csr button,
     #reader__dashboard_section_swaplink { color: #a78bfa !important; }
     #reader__status_span { color: #6B7280 !important; font-size: .8rem !important; }
@@ -704,6 +710,26 @@ async function verificarManual() {
 // ──────────────────────────────────────────────
 // Scanner QR / Código de Barras
 // ──────────────────────────────────────────────
+function selecionarCameraTraseira() {
+  const selectCamera = document.getElementById("reader__camera_selection");
+  if (!selectCamera) return;
+
+  const opcoes = Array.from(selectCamera.options || []);
+  if (!opcoes.length) return;
+
+  const ehTraseira = texto =>
+    /back|rear|traseira|tras|environment/i.test(String(texto || ""));
+
+  const opcaoTraseira =
+    opcoes.find(opt => ehTraseira(opt.text)) ||
+    opcoes.find(opt => ehTraseira(opt.value));
+
+  if (!opcaoTraseira || selectCamera.value === opcaoTraseira.value) return;
+
+  selectCamera.value = opcaoTraseira.value;
+  selectCamera.dispatchEvent(new Event("change", { bubbles: true }));
+}
+
 function iniciarScanner() {
   try {
     if (typeof Html5QrcodeScanner === "undefined") {
@@ -718,12 +744,15 @@ function iniciarScanner() {
         ? { width: 180, height: 95 }
         : { width: 240, height: 140 },
       rememberLastUsedCamera: true,
+      videoConstraints: { facingMode: { ideal: "environment" } },
       supportedScanTypes: [Html5QrcodeScanType.SCAN_TYPE_CAMERA]
     });
     scanner.render(
       decodedText => processarCodigo(decodedText),
       err => {}
     );
+    setTimeout(selecionarCameraTraseira, 400);
+    setTimeout(selecionarCameraTraseira, 1200);
   } catch(e) {
     document.getElementById("reader").innerHTML =
       '<p style="color:#f5576c;text-align:center;padding:24px;font-family:Poppins,sans-serif;">⚠️ Câmera não disponível.<br>Use a entrada manual.</p>';
