@@ -646,15 +646,12 @@ let touchStartY = 0;
 
 function formatarDataHoraBR(dataIso) {
   if (!dataIso) return "—";
-  const normalizada = /[zZ]|[+\-]\d{2}:\d{2}$/.test(dataIso) ? dataIso : `${dataIso}Z`;
-  const dt = new Date(normalizada);
-  if (Number.isNaN(dt.getTime())) return "—";
-  return dt.toLocaleString("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit"
-  });
+  const match = String(dataIso).match(
+    /(\d{4})-(\d{2})-(\d{2})[T\s](\d{2}):(\d{2})/
+  );
+  if (!match) return "—";
+  const [, , mes, dia, hora, minuto] = match;
+  return `${dia}/${mes}, ${hora}:${minuto}`;
 }
 
 // ──────────────────────────────────────────────
