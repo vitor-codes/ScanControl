@@ -563,6 +563,7 @@
 let codigoAtual   = null;
 let sessaoAtual   = null;
 let listaCompleta = [];
+let scannerUiObserver = null;
 
 // ──────────────────────────────────────────────
 // Feedback
@@ -732,19 +733,31 @@ function selecionarCameraTraseira() {
 }
 
 function ocultarControlesScanner() {
-  const seletores = [
-    "#reader__dashboard",
-    "#reader__dashboard_section",
-    "#reader__dashboard_section_csr",
-    "#reader__camera_selection",
-    "#reader__dashboard_section_swaplink",
-    "#reader__status_span"
-  ];
+  const reader = document.getElementById("reader");
+  if (!reader) return;
 
-  seletores.forEach(seletor => {
-    const el = document.querySelector(seletor);
-    if (el) el.style.display = "none";
+  const controles = reader.querySelectorAll(
+    "select, button, a, p, span, label, [id*='camera'], [id*='status'], [id*='dashboard'], [class*='camera'], [class*='dashboard']"
+  );
+
+  controles.forEach(el => {
+    if (el.tagName === "VIDEO" || el.tagName === "CANVAS") return;
+    el.style.display = "none";
   });
+}
+
+function iniciarLimpezaControlesScanner() {
+  const reader = document.getElementById("reader");
+  if (!reader) return;
+
+  ocultarControlesScanner();
+
+  if (scannerUiObserver) scannerUiObserver.disconnect();
+  scannerUiObserver = new MutationObserver(() => {
+    selecionarCameraTraseira();
+    ocultarControlesScanner();
+  });
+  scannerUiObserver.observe(reader, { childList: true, subtree: true });
 }
 
 function iniciarScanner() {
@@ -770,8 +783,8 @@ function iniciarScanner() {
     );
     setTimeout(selecionarCameraTraseira, 400);
     setTimeout(selecionarCameraTraseira, 1200);
-    setTimeout(ocultarControlesScanner, 400);
-    setTimeout(ocultarControlesScanner, 1200);
+    setTimeout(iniciarLimpezaControlesScanner, 400);
+    setTimeout(iniciarLimpezaControlesScanner, 1200);
   } catch(e) {
     document.getElementById("reader").innerHTML =
       '<p style="color:#f5576c;text-align:center;padding:24px;font-family:Poppins,sans-serif;">⚠️ Câmera não disponível.<br>Use a entrada manual.</p>';
